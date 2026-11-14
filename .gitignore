@@ -1,0 +1,48 @@
+
+# GeoCiment - Archivos excluidos de GitHub
+
+# Entorno virtual de Python
+.venv/
+venv/
+env/
+
+# Archivos temporales de Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Pruebas
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Bases de datos de trabajo
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Resultados y reportes generados
+salidas/
+reportes/
+*.log
+
+# Configuración local del editor
+.vscode/
+.idea/
+
+# Archivos temporales de Windows
+Thumbs.db
+desktop.ini
+
+# Archivos temporales de Word
+~$*.docx
+
+# Variables de entorno
+.env
+.env.*
+
+# Distribuciones y compilados
+build/
+dist/
+*.egg-info/
