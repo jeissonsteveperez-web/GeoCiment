@@ -185,6 +185,14 @@ def main(page: ft.Page):
                     f"Capacidad admisible: {r['qadm']:.3f} kPa"
                 ),
                 ft.Text(
+                    f"Carga admisible total: {r['Qadm']:.3f} kN",
+                    weight=ft.FontWeight.BOLD,
+                    color=ft.Colors.BLUE_900,
+                ),
+                ft.Text(
+                    f"Carga vertical aplicada: {p:.3f} kN"
+                ),
+                ft.Text(
                     f"Presión aplicada: {r['qaplicada']:.3f} kPa"
                 ),
                 ft.Text(

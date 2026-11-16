@@ -103,6 +103,10 @@ def generar_memoria(proyecto_id):
             "valor": f"{r['qadm']:.3f} kPa",
         },
         {
+            "concepto": "Carga admisible total",
+            "valor": f"{r['Qadm']:.3f} kN",
+        },
+        {
             "concepto": "Presión aplicada",
             "valor": f"{r['qaplicada']:.3f} kPa",
         },

@@ -71,8 +71,14 @@ def test_suelo_friccionante():
 
     # Cálculo manual con N_gamma=19.7:
     # qult = 0.5 * 18 * 2 * 19.7 * 0.8
-    assert r["qult"] == pytest.approx(283.68)
-    assert r["qadm"] == pytest.approx(94.56)
+     # Cálculo manual con N_gamma = 19.13
+    # qult = 0.5 * 18 * 2 * 19.13 * 0.8
+    # qult = 275.472 kPa
+
+    assert r["qult"] == pytest.approx(275.472)
+    assert r["qadm"] == pytest.approx(91.824)
+    assert r["qaplicada"] == pytest.approx(150.0)
+    assert r["cumple"] is False
     assert r["qaplicada"] == pytest.approx(150.0)
     assert r["cumple"] is False
 
@@ -109,3 +115,62 @@ def test_datos_invalidos():
             carga=600,
             fs=3,
         )
+
+def test_ejemplo_16_1_libro():
+    """
+    Validación con el ejemplo 16.1 del libro.
+
+    Zapata cuadrada de 2 x 2 m.
+    c = 20 kPa
+    phi = 25 grados
+    gamma = 16.5 kN/m3
+    Df = 1.5 m
+    FS = 3
+    """
+
+    r = capacidad_portante(
+        c=20,
+        phi=25,
+        gamma=16.5,
+        b=2,
+        l=2,
+        df=1.5,
+        carga=1438,
+        fs=3,
+    )
+
+    assert r["Nc"] == pytest.approx(25.13)
+    assert r["Nq"] == pytest.approx(12.72)
+    assert r["Ngamma"] == pytest.approx(8.34)
+
+    assert r["qult"] == pytest.approx(
+        1078.288, abs=0.01
+    )
+
+    assert r["qadm"] == pytest.approx(
+        359.4293, abs=0.01
+    )
+
+    # Carga admisible total en kN.
+    carga_admisible = r["qadm"] * 2 * 2
+
+    assert carga_admisible == pytest.approx(
+        1437.7173, abs=0.05
+    )
+def test_carga_admisible_total():
+    """Comprueba la carga admisible del ejemplo 16.1."""
+
+    r = capacidad_portante(
+        c=20,
+        phi=25,
+        gamma=16.5,
+        b=2,
+        l=2,
+        df=1.5,
+        carga=1438,
+        fs=3,
+    )
+
+    assert r["Qadm"] == pytest.approx(
+        1437.7173, abs=0.05
+    )

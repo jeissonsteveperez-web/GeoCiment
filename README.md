@@ -265,6 +265,48 @@ GeoCiment fue desarrollado como proyecto académico de Programación II, utiliza
 
 La ejecución, integración, revisión y sustentación del proyecto corresponden al estudiante desarrollador.
 
+## Validación del modelo geotécnico
+
+El modelo de GeoCiment fue contrastado con el ejemplo
+16.1 del texto de referencia utilizado en el proyecto,
+correspondiente a una cimentación cuadrada de 2 × 2 m.
+
+### Datos del ejercicio
+
+- Cohesión: 20 kPa
+- Ángulo de fricción: 25°
+- Peso unitario: 16,5 kN/m³
+- Profundidad de desplante: 1,5 m
+- Factor de seguridad: 3
+
+### Comparación de resultados
+
+| Parámetro | Libro | GeoCiment |
+|---|---:|---:|
+| Nc | 25,13 | 25,13 |
+| Nq | 12,72 | 12,72 |
+| Nγ | 8,34 | 8,34 |
+| Capacidad última (kPa) | 1078,29 | 1078,288 |
+| Capacidad admisible (kPa) | 359,5 aprox. | 359,429 |
+| Carga admisible (kN) | 1438 aprox. | 1437,717 |
+
+Las pequeñas diferencias corresponden al redondeo
+de los resultados presentados en el libro.
+
+Los factores de capacidad portante fueron tomados
+de la tabla 16.1 del mismo texto. Para valores
+intermedios del ángulo de fricción se utiliza
+interpolación lineal mediante NumPy.
+
+La comparación se incorporó a las pruebas
+automatizadas mediante pytest, obteniendo
+seis pruebas aprobadas.
+
+Esta validación corresponde a las hipótesis del
+modelo implementado y no reemplaza las demás
+verificaciones de diseño geotécnico.
+
+
 ## 14. Autor
 
 **Jeison Steven Pérez Maldonado**
