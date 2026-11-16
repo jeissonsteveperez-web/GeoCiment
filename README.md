@@ -243,17 +243,20 @@ La base de datos y los reportes de trabajo se generan localmente.
 
 ## 11. Capturas de pantalla
 
+
+## 11. Capturas de pantalla
+
 ### Interfaz principal
 
-![Interfaz de cálculo](ejemplos/interfaz.png)
+![Interfaz de cálculo](./ejemplos/interfaz.png)
 
 ### Resultados y gráfica
 
-![Resultados geotécnicos](ejemplos/resultados.png)
+![Resultados geotécnicos](./ejemplos/resultados.png)
 
 ### Historial de proyectos
 
-![Historial SQLite](ejemplos/historial.png)
+![Historial SQLite](./ejemplos/historial.png)
 
 ## 12. Referencia bibliográfica
 
