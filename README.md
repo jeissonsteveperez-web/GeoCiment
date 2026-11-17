@@ -258,6 +258,15 @@ La base de datos y los reportes de trabajo se generan localmente.
 
 ![Historial SQLite](./ejemplos/historial.png)
 
+### Memoria de cálculo en Word
+
+GeoCiment genera automáticamente memorias de cálculo
+en formato DOCX, incluyendo parámetros de entrada,
+ecuaciones matemáticas editables, resultados geotécnicos,
+gráficas y el esquema referencial de cimentación.
+
+![Memoria de cálculo generada por GeoCiment](./ejemplos/memoria_word.png)
+
 ## 12. Referencia bibliográfica
 
 Terzaghi, K. (1943). *Theoretical Soil Mechanics*. John Wiley & Sons.
