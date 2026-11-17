@@ -11,6 +11,7 @@ import math
 import flet as ft
 import matplotlib.pyplot as plt
 
+from app.esquema import generar_esquema
 
 from app.reporte import generar_memoria
 
@@ -86,7 +87,13 @@ def main(page: ft.Page):
         fit=ft.BoxFit.CONTAIN,
         visible=False,
     )
-
+    esquema = ft.Image(
+        src=b"",
+        width=950,
+        height=650,
+        fit=ft.BoxFit.CONTAIN,
+        visible=False,
+    )
     mensaje = ft.Text(
         "Introduce los datos y presiona Calcular.",
         color=ft.Colors.BLUE_700,
@@ -241,6 +248,27 @@ def main(page: ft.Page):
 
             mensaje.value = "Cálculo realizado correctamente."
             mensaje.color = ft.Colors.GREEN_700
+            # Crear esquema técnico con las dimensiones
+            # y resultados del cálculo actual.
+            figura_esquema = generar_esquema(
+                ultimo_calculo["entradas"],
+                ultimo_calculo["resultados"],
+            )
+
+            buffer_esquema = io.BytesIO()
+
+            try:
+                figura_esquema.savefig(
+                    buffer_esquema,
+                    format="png",
+                    dpi=150,
+                    bbox_inches="tight",
+                )
+            finally:
+                plt.close(figura_esquema)
+
+            esquema.src = buffer_esquema.getvalue()
+            esquema.visible = True
 
         except (ValueError, OverflowError, ZeroDivisionError) as error:
             ultimo_calculo["entradas"] = None
@@ -249,14 +277,23 @@ def main(page: ft.Page):
             resultados.controls.clear()
             grafica.visible = False
             grafica.src = None
+            esquema.visible = False
+            esquema.src = None
 
             mensaje.value = f"Error: {error}"
             mensaje.color = ft.Colors.RED_700
 
         except Exception as error:
+            ultimo_calculo["entradas"] = None
+            ultimo_calculo["resultados"] = None
+            ultimo_calculo["proyecto_id"] = None
+
             resultados.controls.clear()
             grafica.visible = False
             grafica.src = None
+            esquema.visible = False
+            esquema.src = None
+
 
             mensaje.value = (
                 f"No se pudo completar el cálculo: {error}"
@@ -446,6 +483,12 @@ def main(page: ft.Page):
             ft.Divider(),
             resultados,
             grafica,
+            ft.Text(
+                "ESQUEMA REFERENCIAL DE CIMENTACIÓN",
+                size=19,
+                weight=ft.FontWeight.BOLD,
+            ),
+            esquema,
         ],
         scroll=ft.ScrollMode.AUTO,
         expand=True,

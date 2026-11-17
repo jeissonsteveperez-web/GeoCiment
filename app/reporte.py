@@ -1,7 +1,12 @@
 
 """
-GeoCiment - Generación de memoria de cálculo en Word.
-Utiliza docxtpl y las gráficas de Matplotlib.
+GeoCiment - Generación de memorias de cálculo en Word.
+
+Integra:
+- Resultados geotécnicos almacenados en SQLite.
+- Gráfica de capacidad portante.
+- Esquema referencial de cimentación.
+- Memoria de cálculo mediante docxtpl.
 """
 
 from pathlib import Path
@@ -14,6 +19,7 @@ from docx.shared import Mm
 
 from app.db import obtener_proyecto, listar_proyectos
 from app.graficas import grafica_capacidad
+from app.esquema import generar_esquema
 
 
 RAIZ = Path(__file__).resolve().parent.parent
@@ -23,10 +29,17 @@ REPORTES = RAIZ / "salidas" / "reportes"
 
 def generar_memoria(proyecto_id):
     """
-    Genera la memoria Word de un proyecto guardado.
+    Genera una memoria Word de un proyecto guardado.
 
-    Retorna la ruta del documento generado.
+    Utiliza los datos y resultados del cálculo
+    más reciente almacenado en SQLite.
+
+    Retorna la ruta del archivo DOCX generado.
     """
+
+    # ---------------------------------------------
+    # 1. Recuperar proyecto
+    # ---------------------------------------------
 
     proyecto = obtener_proyecto(proyecto_id)
 
@@ -41,10 +54,10 @@ def generar_memoria(proyecto_id):
     if not PLANTILLA.exists():
         raise FileNotFoundError(
             "No existe plantillas/memoria.docx. "
-            "Ejecuta primero crear_plantilla.py."
+            "Ejecuta crear_plantilla.py si necesitas "
+            "crear una plantilla nueva."
         )
 
-    # Recuperar el cálculo más reciente.
     calculo = proyecto["calculos"][-1]
 
     datos = calculo["entradas"]
@@ -59,7 +72,10 @@ def generar_memoria(proyecto_id):
     carga = datos["carga"]
     fs = datos["fs"]
 
-    # Generar la misma gráfica utilizada en la app.
+    # ---------------------------------------------
+    # 2. Generar gráfica de capacidad portante
+    # ---------------------------------------------
+
     figura = grafica_capacidad(
         c, phi, gamma, b, l, df, carga, fs
     )
@@ -78,8 +94,35 @@ def generar_memoria(proyecto_id):
 
     imagen.seek(0)
 
-    # Abrir plantilla docxtpl.
+    # ---------------------------------------------
+    # 3. Generar esquema de cimentación
+    # ---------------------------------------------
+
+    figura_esquema = generar_esquema(datos, r)
+
+    imagen_esquema = BytesIO()
+
+    try:
+        figura_esquema.savefig(
+            imagen_esquema,
+            format="png",
+            dpi=160,
+            bbox_inches="tight",
+        )
+    finally:
+        plt.close(figura_esquema)
+
+    imagen_esquema.seek(0)
+
+    # ---------------------------------------------
+    # 4. Abrir plantilla Word
+    # ---------------------------------------------
+
     documento = DocxTemplate(PLANTILLA)
+
+    # ---------------------------------------------
+    # 5. Preparar tabla de resultados
+    # ---------------------------------------------
 
     filas = [
         {
@@ -104,7 +147,9 @@ def generar_memoria(proyecto_id):
         },
         {
             "concepto": "Carga admisible total",
-            "valor": f"{r['Qadm']:.3f} kN",
+            "valor": (
+                f"{r.get('Qadm', r['qadm'] * b * l):.3f} kN"
+            ),
         },
         {
             "concepto": "Presión aplicada",
@@ -128,6 +173,10 @@ def generar_memoria(proyecto_id):
         },
     ]
 
+    # ---------------------------------------------
+    # 6. Elaborar conclusión
+    # ---------------------------------------------
+
     if r["cumple"]:
         conclusion = (
             "La presión aplicada es menor o igual "
@@ -144,26 +193,48 @@ def generar_memoria(proyecto_id):
             "portante bajo las hipótesis adoptadas."
         )
 
+    # ---------------------------------------------
+    # 7. Preparar información para Word
+    # ---------------------------------------------
+
     contexto = {
         "proyecto": proyecto["nombre"],
         "ubicacion": proyecto["ubicacion"] or "No indicada",
         "fecha": calculo["fecha"],
+
         "c": f"{c:.3f}",
         "phi": f"{phi:.3f}",
         "gamma": f"{gamma:.3f}",
+
         "b": f"{b:.3f}",
         "l": f"{l:.3f}",
         "df": f"{df:.3f}",
+
         "carga": f"{carga:.3f}",
         "fs": f"{fs:.3f}",
+
         "filas": filas,
+
+        # Gráfica de capacidad portante.
         "grafica": InlineImage(
             documento,
             imagen,
             width=Mm(150),
         ),
+
+        # Esquema dinámico de cimentación.
+        "esquema": InlineImage(
+            documento,
+            imagen_esquema,
+            width=Mm(150),
+        ),
+
         "conclusion": conclusion,
     }
+
+    # ---------------------------------------------
+    # 8. Renderizar documento Word
+    # ---------------------------------------------
 
     documento.render(contexto)
 
@@ -183,10 +254,19 @@ def generar_memoria(proyecto_id):
 
     documento.save(destino)
 
+    # Cerrar los archivos temporales en memoria.
+    imagen.close()
+    imagen_esquema.close()
+
     return destino
 
 
+# -------------------------------------------------
+# Prueba independiente del módulo
+# -------------------------------------------------
+
 if __name__ == "__main__":
+
     proyectos = listar_proyectos()
 
     if not proyectos:
@@ -194,6 +274,7 @@ if __name__ == "__main__":
             "No hay proyectos guardados. "
             "Guarda primero un cálculo desde GeoCiment."
         )
+
     else:
         proyecto_id = proyectos[0]["id"]
 
